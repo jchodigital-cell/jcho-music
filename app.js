@@ -53,11 +53,13 @@ async function buscar() {
 
 /* Internet Archive */
 async function buscarArchive(q) {
-  const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(`(creator:(${q}) OR title:(${q})) AND mediatype:audio`)}&fl[]=identifier&fl[]=title&fl[]=creator&rows=15&output=json`;
+  $('lista-albumes').innerHTML = ''; $('albums-titulo').textContent = '';
+  const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(`(creator:(${q}) OR title:(${q}) OR description:(${q})) AND mediatype:audio`)}&fl[]=identifier&fl[]=title&fl[]=creator&rows=12&output=json`;
   const r = await fetch(url);
   const d = await r.json();
   const docs = d.response?.docs || [];
   resultados = [];
+  const albumes = [];
   for (const doc of docs) {
     try {
       const meta = await (await fetch(`https://archive.org/metadata/${doc.identifier}`)).json();
@@ -77,8 +79,41 @@ async function buscarArchive(q) {
         cover: `https://archive.org/services/img/${doc.identifier}`,
         origen: 'Internet Archive'
       }));
+      albumes.push({ titulo: doc.title || doc.identifier, artista: doc.creator || 'Desconocido', identifier: doc.identifier, cover: `https://archive.org/services/img/${doc.identifier}` });
     } catch (_) {}
   }
+  pintarResultados();
+  pintarAlbumes(albumes);
+}
+
+function pintarAlbumes(albumes) {
+  const ul = $('lista-albumes');
+  ul.innerHTML = '';
+  if (!albumes.length) { $('albums-titulo').textContent = ''; return; }
+  $('albums-titulo').textContent = '💿 Álbumes encontrados';
+  albumes.forEach(a => {
+    const li = document.createElement('li');
+    li.innerHTML = `<div style="display:flex;align-items:center;min-width:0"><img src="${a.cover}" onerror="this.src='logo.svg'" style="width:44px;height:44px;border-radius:8px;object-fit:cover;margin-right:10px">
+      <div class="meta"><strong>${escapeHtml(a.titulo)}</strong><small>${escapeHtml(a.artista)} · Internet Archive</small></div></div>
+      <div><button class="abrir">Abrir</button></div>`;
+    li.querySelector('.abrir').addEventListener('click', () => abrirAlbum(a));
+    ul.appendChild(li);
+  });
+}
+
+async function abrirAlbum(a) {
+  $('sin-resultados').textContent = 'Cargando álbum...'; $('sin-resultados').style.display = 'block';
+  const meta = await (await fetch(`https://archive.org/metadata/${a.identifier}`)).json();
+  const archivos = (meta.files || []).filter(f => /\.(mp3|ogg|flac|m4a)$/i.test(f.name));
+  const porTitulo = {};
+  archivos.forEach(ar => {
+    const clave = (ar.title || ar.name.replace(/\.[^.]+$/, '')).toLowerCase().trim();
+    if (!porTitulo[clave] || /\.mp3$/i.test(ar.name)) porTitulo[clave] = ar;
+  });
+  resultados = Object.values(porTitulo).map(ar => ({
+    titulo: ar.title || ar.name.replace(/\.[^.]+$/, ''), artista: a.artista, album: a.titulo,
+    url: `https://archive.org/download/${a.identifier}/${encodeURIComponent(ar.name)}`, cover: a.cover, origen: 'Internet Archive'
+  }));
   pintarResultados();
 }
 

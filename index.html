@@ -19,7 +19,7 @@
 
 <main>
   <section class="buscador">
-    <input type="text" id="busqueda" placeholder="🔍 Buscar música...">
+    <input type="text" id="busqueda" placeholder="🔍 Buscar canciones, álbumes, artistas o pódcasts">
     <button id="buscar-btn" type="button">Buscar</button>
     <div class="fuentes">
       <button class="fuente activa" data-fuente="archive" type="button">Internet Archive</button>
@@ -68,6 +68,8 @@
     <button id="play-all" type="button" style="margin-bottom:10px">▶ Reproducir todo</button>
     <button id="play-shuffle" type="button" style="margin-bottom:10px">🔀 Aleatorio</button>
     <ul id="lista-resultados"></ul>
+    <p id="albums-titulo" style="margin-top:14px;font-weight:bold"></p>
+    <ul id="lista-albumes"></ul>
     <p id="sin-resultados" class="sin-datos">Busca algo para comenzar 🎶</p>
   </section>
 
