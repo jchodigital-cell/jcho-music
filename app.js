@@ -60,6 +60,7 @@ async function buscarArchive(q) {
         artista: doc.creator || 'Desconocido',
         album: doc.title || doc.identifier,
         url: `https://archive.org/download/${doc.identifier}/${encodeURIComponent(archivo.name)}`,
+        cover: `https://archive.org/services/img/${doc.identifier}`,
         origen: 'Internet Archive'
       }));
     } catch (_) {}
@@ -86,7 +87,7 @@ async function buscarJamendo(q) {
     const tUrl = `https://api.jamendo.com/v3.0/tracks/?client_id=${jamendoKey()}&format=json&limit=50&artist_id=${a.id}&audioformat=mp31`;
     const tData = await (await fetch(tUrl)).json();
     (tData.results || []).forEach(t => resultados.push({
-      titulo: t.name, artista: t.artist_name, album: t.album_name, url: t.audio, origen: 'Jamendo (CC)'
+      titulo: t.name, artista: t.artist_name, album: t.album_name, cover: t.album_image, url: t.audio, origen: 'Jamendo (CC)'
     }));
   }
   // Evitar duplicados (misma canción de varios artistas similares)
@@ -101,7 +102,7 @@ async function buscarJamendo(q) {
   if (!resultados.length) {
     const url = `https://api.jamendo.com/v3.0/tracks/?client_id=${jamendoKey()}&format=json&limit=50&namesearch=${encodeURIComponent(q)}&audioformat=mp31`;
     const d = await (await fetch(url)).json();
-    resultados = (d.results || []).map(t => ({ titulo: t.name, artista: t.artist_name, album: t.album_name, url: t.audio, origen: 'Jamendo (CC)' }));
+    resultados = (d.results || []).map(t => ({ titulo: t.name, artista: t.artist_name, album: t.album_name, cover: t.album_image, url: t.audio, origen: 'Jamendo (CC)' }));
   }
   pintarResultados();
 }
@@ -132,7 +133,8 @@ function pintarResultados() {
   if (!resultados.length && fuente !== 'local') $('sin-resultados').textContent = 'Sin resultados.';
   resultados.forEach((p, i) => {
     const li = document.createElement('li');
-    li.innerHTML = `<div class="meta"><strong>${escapeHtml(p.titulo)}</strong><small>${escapeHtml(p.artista)}${p.album ? ' · ' + escapeHtml(p.album) : ''} · ${p.origen}</small></div>
+    li.innerHTML = `<div style="display:flex;align-items:center;min-width:0"><img src="${p.cover || 'logo.svg'}" onerror="this.src='logo.svg'" style="width:48px;height:48px;border-radius:8px;object-fit:cover;margin-right:10px">
+      <div class="meta"><strong>${escapeHtml(p.titulo)}</strong><small>${escapeHtml(p.artista)}${p.album ? ' · ' + escapeHtml(p.album) : ''} · ${p.origen}</small></div></div>
       <div><button class="tocar">▶</button> <button class="agregar">+ Cola</button></div>`;
     li.querySelector('.tocar').addEventListener('click', () => { cola = [...resultados]; indiceCola = i; reproducir(); });
     li.querySelector('.agregar').addEventListener('click', () => { cola.push(p); pintarCola(); });
@@ -175,6 +177,7 @@ async function buscarArchiveGenero(g) {
         artista: doc.creator || 'Desconocido',
         album: doc.title || doc.identifier,
         url: `https://archive.org/download/${doc.identifier}/${encodeURIComponent(archivo.name)}`,
+        cover: `https://archive.org/services/img/${doc.identifier}`,
         origen: 'Internet Archive'
       }));
       if (resultados.length >= 60) break;
@@ -189,7 +192,7 @@ async function buscarArchiveGenero(g) {
       try {
         const meta = await (await fetch(`https://archive.org/metadata/${doc.identifier}`)).json();
         const a0 = (meta.files || []).find(f => /\.mp3$/i.test(f.name) || /\.ogg$/i.test(f.name));
-        if (a0) resultados.push({ titulo: a0.title || a0.name, artista: doc.creator || 'Desconocido', album: doc.title, url: `https://archive.org/download/${doc.identifier}/${encodeURIComponent(a0.name)}`, origen: 'Internet Archive' });
+        if (a0) resultados.push({ titulo: a0.title || a0.name, artista: doc.creator || 'Desconocido', album: doc.title, url: `https://archive.org/download/${doc.identifier}/${encodeURIComponent(a0.name)}`, cover: `https://archive.org/services/img/${doc.identifier}`, origen: 'Internet Archive' });
       } catch (_) {}
     }
     pintarResultados();
@@ -202,10 +205,12 @@ function pintarCola() {
   ul.innerHTML = '';
   cola.forEach((p, i) => {
     const li = document.createElement('li');
-    li.innerHTML = `<div class="meta"><strong>${escapeHtml(p.titulo)}</strong><small>${escapeHtml(p.artista)}</small></div>
-      <div><button class="tocar">▶</button></div>`;
+    li.innerHTML = `<div style="display:flex;align-items:center;min-width:0"><img src="${p.cover || 'logo.svg'}" onerror="this.src='logo.svg'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;margin-right:10px">
+      <div class="meta"><strong>${escapeHtml(p.titulo)}</strong><small>${escapeHtml(p.artista)}</small></div></div>
+      <div><button class="tocar">▶</button><button class="quitar">✕</button></div>`;
     if (i === indiceCola) li.style.background = '#334155';
     li.querySelector('.tocar').addEventListener('click', () => { indiceCola = i; reproducir(); });
+    li.querySelector('.quitar').addEventListener('click', () => { cola.splice(i, 1); if (i === indiceCola) { audio.pause(); audio.src=''; } pintarCola(); });
     ul.appendChild(li);
   });
 }
@@ -219,6 +224,7 @@ function reproducir() {
   audio.play();
   $('pista-titulo').textContent = p.titulo;
   $('pista-artista').textContent = p.artista + ' · ' + p.origen;
+  $('pista-cover').src = p.cover || 'logo.svg';
   $('play').textContent = '⏸';
   pintarCola();
 }
