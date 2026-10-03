@@ -11,6 +11,7 @@
 </head>
 <body>
 <header>
+  <button id="tema-btn" type="button" style="float:right;background:#334155;color:#e2e8f0">☀️ Modo claro</button>
   <img src="logo.svg" alt="Logo JCHO" width="70" height="70">
   <h1>JCHO Music</h1>
   <p>Reproductor sin anuncios · Música libre, Creative Commons y tus archivos</p>
@@ -64,8 +65,16 @@
   <section class="resultados">
     <h2 id="titulo-resultados">Resultados</h2>
     <button id="vista" type="button" class="fuente" style="margin-bottom:10px">▦ Vista tarjetas</button>
+    <button id="play-all" type="button" style="margin-bottom:10px">▶ Reproducir todo</button>
+    <button id="play-shuffle" type="button" style="margin-bottom:10px">🔀 Aleatorio</button>
     <ul id="lista-resultados"></ul>
     <p id="sin-resultados" class="sin-datos">Busca algo para comenzar 🎶</p>
+  </section>
+
+  <section class="historial">
+    <h2>🕘 Últimas escuchadas</h2>
+    <ul id="lista-historial"></ul>
+    <button id="limpiar-historial" type="button" class="reset">Limpiar historial</button>
   </section>
 
   <section class="cola">
@@ -77,7 +86,7 @@
 
 <footer id="reproductor">
   <div class="info-pista" style="display:flex;align-items:center;justify-content:center;gap:12px">
-    <img id="pista-cover" src="logo.svg" style="width:56px;height:56px;border-radius:10px;object-fit:cover">
+    <img id="pista-cover" src="logo.svg" style="width:56px;height:56px;border-radius:10px;object-fit:cover;cursor:pointer" title="Ampliar">
     <div><strong id="pista-titulo">Nada sonando</strong>
     <small id="pista-artista">—</small></div>
   </div>
@@ -96,6 +105,13 @@
   <input type="range" id="volumen" min="0" max="1" step="0.01" value="0.8" title="Volumen">
   <audio id="audio" preload="metadata"></audio>
 </footer>
+
+<div id="ahora" style="position:fixed;inset:0;background:rgba(15,23,42,.97);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:50;text-align:center;padding:20px">
+  <img id="ahora-cover" style="width:260px;height:260px;border-radius:18px;object-fit:cover;box-shadow:0 10px 40px #000">
+  <h2 id="ahora-titulo" style="margin-top:16px"></h2>
+  <p id="ahora-artista" style="color:#94a3b8"></p>
+  <button id="cerrar-ahora" type="button" style="margin-top:16px;background:#334155;color:#e2e8f0">Cerrar</button>
+</div>
 
 <script src="app.js"></script>
 </body>

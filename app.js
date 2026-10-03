@@ -213,6 +213,49 @@ async function buscarArchiveGenero(g) {
   }
 }
 
+let historial = JSON.parse(localStorage.getItem('jcho-historial') || '[]');
+function agregarHistorial(p) {
+  historial = [p, ...historial.filter(x => x.url !== p.url)].slice(0, 20);
+  localStorage.setItem('jcho-historial', JSON.stringify(historial));
+  pintarHistorial();
+}
+function pintarHistorial() {
+  const ul = $('lista-historial');
+  ul.innerHTML = '';
+  historial.forEach((p, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<div style="display:flex;align-items:center;min-width:0"><img src="${p.cover || 'logo.svg'}" onerror="this.src='logo.svg'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;margin-right:10px">
+      <div class="meta"><strong>${escapeHtml(p.titulo)}</strong><small>${escapeHtml(p.artista)}</small></div></div>
+      <div><button class="tocar">▶</button></div>`;
+    li.querySelector('.tocar').addEventListener('click', () => { cola = [p]; indiceCola = 0; reproducir(); });
+    ul.appendChild(li);
+  });
+}
+$('limpiar-historial').addEventListener('click', () => { historial = []; localStorage.removeItem('jcho-historial'); pintarHistorial(); });
+pintarHistorial();
+
+// Tema claro/oscuro
+if (localStorage.getItem('jcho-tema') === 'claro') { document.body.classList.add('claro'); $('tema-btn').textContent = '🌙 Modo oscuro'; }
+$('tema-btn').addEventListener('click', () => {
+  const claro = document.body.classList.toggle('claro');
+  localStorage.setItem('jcho-tema', claro ? 'claro' : 'oscuro');
+  $('tema-btn').textContent = claro ? '🌙 Modo oscuro' : '☀️ Modo claro';
+});
+
+// Pantalla "Reproduciendo ahora"
+$('pista-cover').addEventListener('click', () => {
+  if (!audio.src) return;
+  $('ahora-cover').src = $('pista-cover').src;
+  $('ahora-titulo').textContent = $('pista-titulo').textContent;
+  $('ahora-artista').textContent = $('pista-artista').textContent;
+  $('ahora').style.display = 'flex';
+});
+$('cerrar-ahora').addEventListener('click', () => $('ahora').style.display = 'none');
+
+// Reproducir todo / Aleatorio
+$('play-all').addEventListener('click', () => { if (!resultados.length) return; cola = [...resultados]; indiceCola = 0; reproducir(); });
+$('play-shuffle').addEventListener('click', () => { if (!resultados.length) return; cola = [...resultados].sort(() => Math.random() - 0.5); indiceCola = 0; reproducir(); });
+
 /* ---------- Cola ---------- */
 function pintarCola() {
   const ul = $('lista-cola');
@@ -242,6 +285,7 @@ function reproducir() {
   $('pista-cover').src = p.cover || 'logo.svg';
   $('play').textContent = '⏸';
   pintarCola();
+  agregarHistorial(p);
 }
 $('play').addEventListener('click', () => {
   if (!audio.src) return;

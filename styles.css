@@ -41,4 +41,10 @@ li button { padding: 6px 12px; }
 .progreso { display: flex; align-items: center; gap: 10px; }
 .progreso input { flex: 1; }
 #volumen { width: 140px; align-self: center; }
+body.claro { background: #f1f5f9; color: #0f172a; }
+body.claro section { background: #ffffff; }
+body.claro input[type=text] { background: #e2e8f0; color: #0f172a; border-color: #cbd5e1; }
+body.claro #reproductor, body.claro li, body.claro .card { background: #e2e8f0; }
+body.claro #reproductor { background: #ffffff; border-top-color: #38bdf8; }
+body.claro small, body.claro .ayuda, body.claro .sin-datos { color: #475569; }
 input[type=range] { accent-color: #38bdf8; }
