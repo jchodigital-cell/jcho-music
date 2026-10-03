@@ -139,6 +139,23 @@ function pintarResultados() {
   });
 }
 
+/* ---------- Géneros ---------- */
+document.querySelectorAll('.genero').forEach(b => b.addEventListener('click', async () => {
+  fuente = 'jamendo';
+  document.querySelectorAll('.fuente').forEach(x => x.classList.remove('activa'));
+  document.querySelector('.fuente[data-fuente="jamendo"]').classList.add('activa');
+  $('jamendo-config').hidden = false;
+  $('local-config').hidden = true;
+  $('sin-resultados').textContent = 'Cargando ' + b.textContent + '...';
+  $('sin-resultados').style.display = 'block';
+  const url = `https://api.jamendo.com/v3.0/tracks/?client_id=${jamendoKey()}&format=json&limit=30&fuzzytags=${b.dataset.g}&audioformat=mp31`;
+  try {
+    const d = await (await fetch(url)).json();
+    resultados = (d.results || []).map(t => ({ titulo: t.name, artista: t.artist_name, album: t.album_name, url: t.audio, origen: 'Jamendo (CC)' }));
+    pintarResultados();
+  } catch (e) { $('sin-resultados').textContent = 'Error: ' + e.message; }
+}));
+
 /* ---------- Cola ---------- */
 function pintarCola() {
   const ul = $('lista-cola');

@@ -16,6 +16,9 @@ input[type=text] { background: #0f172a; border: 1px solid #334155; color: #e2e8f
 .fuente { background: #334155; color: #e2e8f0; }
 .fuente.activa { background: #4ade80; color: #0f172a; }
 .jamendo-config, .local-config { margin-top: 12px; }
+.generos { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.genero { background: #334155; color: #e2e8f0; padding: 5px 11px; font-size: 0.85rem; }
+.genero:hover { background: #38bdf8; color: #0f172a; }
 .ayuda { color: #94a3b8; font-size: 0.85rem; margin-top: 6px; }
 ul { list-style: none; }
 li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 6px; border-bottom: 1px solid #334155; }
