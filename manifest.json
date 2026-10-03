@@ -1,0 +1,12 @@
+{
+  "name": "JCHO Music",
+  "short_name": "JCHO Music",
+  "description": "Reproductor de música libre y sin anuncios",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    { "src": "logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

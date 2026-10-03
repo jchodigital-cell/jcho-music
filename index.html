@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JCHO Music - Reproductor libre y sin anuncios</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+</head>
+<body>
+<header>
+  <img src="logo.svg" alt="Logo JCHO" width="70" height="70">
+  <h1>JCHO Music</h1>
+  <p>Reproductor sin anuncios · Música libre, Creative Commons y tus archivos</p>
+</header>
+
+<main>
+  <section class="buscador">
+    <input type="text" id="busqueda" placeholder="🔍 Buscar música...">
+    <button id="buscar-btn" type="button">Buscar</button>
+    <div class="fuentes">
+      <button class="fuente activa" data-fuente="archive" type="button">Internet Archive</button>
+      <button class="fuente" data-fuente="jamendo" type="button">Jamendo (CC)</button>
+      <button class="fuente" data-fuente="local" type="button">Mi biblioteca</button>
+    </div>
+    <div id="jamendo-config" class="jamendo-config" hidden>
+      <input type="text" id="jamendo-key" placeholder="Tu Jamendo client_id (opcional)">
+      <button id="guardar-key" type="button">Guardar</button>
+    </div>
+    <div id="local-config" class="local-config" hidden>
+      <input type="file" id="archivos-locales" accept="audio/*" multiple>
+      <p class="ayuda">Selecciona tus archivos de audio (MP3, OGG, WAV...). Quedan solo en tu navegador.</p>
+    </div>
+  </section>
+
+  <section class="resultados">
+    <h2 id="titulo-resultados">Resultados</h2>
+    <ul id="lista-resultados"></ul>
+    <p id="sin-resultados" class="sin-datos">Busca algo para comenzar 🎶</p>
+  </section>
+
+  <section class="cola">
+    <h2>🎵 Cola de reproducción</h2>
+    <ul id="lista-cola"></ul>
+    <button id="limpiar-cola" type="button" class="reset">Limpiar cola</button>
+  </section>
+</main>
+
+<footer id="reproductor">
+  <div class="info-pista">
+    <strong id="pista-titulo">Nada sonando</strong>
+    <small id="pista-artista">—</small>
+  </div>
+  <div class="controles">
+    <button id="anterior" type="button">⏮</button>
+    <button id="play" type="button">▶️</button>
+    <button id="siguiente" type="button">⏭</button>
+    <button id="shuffle" type="button" title="Aleatorio">🔀</button>
+  </div>
+  <div class="progreso">
+    <span id="tiempo-actual">0:00</span>
+    <input type="range" id="barra-progreso" min="0" max="100" value="0">
+    <span id="tiempo-total">0:00</span>
+  </div>
+  <input type="range" id="volumen" min="0" max="1" step="0.01" value="0.8" title="Volumen">
+  <audio id="audio" preload="metadata"></audio>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
