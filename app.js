@@ -69,13 +69,14 @@ async function buscarArchive(q) {
 
 /* Jamendo */
 function jamendoKey() {
-  return localStorage.getItem('jcho-jamendo-key') || '709fa152'; // demo; guarda la tuya
+  return localStorage.getItem('jcho-jamendo-key') || ''; // requiere tu propio client_id
 }
 $('guardar-key').addEventListener('click', () => {
   const k = $('jamendo-key').value.trim();
   if (k) { localStorage.setItem('jcho-jamendo-key', k); alert('Guardada ✔'); }
 });
 async function buscarJamendo(q) {
+  if (!jamendoKey()) { $('sin-resultados').textContent = 'Para usar Jamendo guarda tu client_id gratis en devportal.jamendo.com. Mientras tanto, usa Internet Archive.'; return; }
   // Primero buscar artistas que coincidan y traer TODAS sus canciones
   const aUrl = `https://api.jamendo.com/v3.0/artists/?client_id=${jamendoKey()}&format=json&limit=5&namesearch=${encodeURIComponent(q)}`;
   const aData = await (await fetch(aUrl)).json();
@@ -141,26 +142,59 @@ function pintarResultados() {
 
 /* ---------- Géneros ---------- */
 document.querySelectorAll('.genero').forEach(b => b.addEventListener('click', async () => {
-  fuente = 'jamendo';
+  // Usar Internet Archive como fuente de géneros (Jamendo requiere client_id propia)
+  fuente = 'archive';
   document.querySelectorAll('.fuente').forEach(x => x.classList.remove('activa'));
-  document.querySelector('.fuente[data-fuente="jamendo"]').classList.add('activa');
-  $('jamendo-config').hidden = false;
+  document.querySelector('.fuente[data-fuente="archive"]').classList.add('activa');
+  $('jamendo-config').hidden = true;
   $('local-config').hidden = true;
   $('sin-resultados').textContent = 'Cargando ' + b.textContent + '...';
   $('sin-resultados').style.display = 'block';
-  const url = `https://api.jamendo.com/v3.0/tracks/?client_id=${jamendoKey()}&format=json&limit=30&fuzzytags=${b.dataset.g}&audioformat=mp31`;
   try {
-    const d = await (await fetch(url)).json();
-    resultados = (d.results || []).map(t => ({ titulo: t.name, artista: t.artist_name, album: t.album_name, url: t.audio, origen: 'Jamendo (CC)' }));
-    // Si no hay resultados por etiqueta, buscar por nombre/etiqueta
-    if (!resultados.length) {
-      const alt = `https://api.jamendo.com/v3.0/tracks/?client_id=${jamendoKey()}&format=json&limit=30&tags=${b.dataset.g}&audioformat=mp31`;
-      const d2 = await (await fetch(alt)).json();
-      resultados = (d2.results || []).map(t => ({ titulo: t.name, artista: t.artist_name, album: t.album_name, url: t.audio, origen: 'Jamendo (CC)' }));
-    }
-    pintarResultados();
+    await buscarArchiveGenero(b.dataset.g);
   } catch (e) { $('sin-resultados').textContent = 'Error: ' + e.message; }
 }));
+
+async function buscarArchiveGenero(g) {
+  const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(`(subject:(${g}) OR title:(${g}) OR description:(${g})) AND mediatype:audio AND licenseurl:(*creativecommons*)`)}&fl[]=identifier&fl[]=title&fl[]=creator&rows=10&output=json`;
+  const r = await fetch(url);
+  const d = await r.json();
+  const docs = d.response?.docs || [];
+  resultados = [];
+  for (const doc of docs) {
+    try {
+      const meta = await (await fetch(`https://archive.org/metadata/${doc.identifier}`)).json();
+      const archivos = (meta.files || []).filter(f => /\.(mp3|ogg|flac|m4a)$/i.test(f.name));
+      const porTitulo = {};
+      archivos.forEach(a => {
+        const clave = (a.title || a.name.replace(/\.[^.]+$/, '')).toLowerCase().trim();
+        if (!porTitulo[clave] || /\.mp3$/i.test(a.name)) porTitulo[clave] = a;
+      });
+      Object.values(porTitulo).forEach(archivo => resultados.push({
+        titulo: archivo.title || archivo.name.replace(/\.[^.]+$/, ''),
+        artista: doc.creator || 'Desconocido',
+        album: doc.title || doc.identifier,
+        url: `https://archive.org/download/${doc.identifier}/${encodeURIComponent(archivo.name)}`,
+        origen: 'Internet Archive'
+      }));
+      if (resultados.length >= 60) break;
+    } catch (_) {}
+  }
+  pintarResultados();
+  if (!resultados.length) {
+    // Reintento sin filtrar licencia
+    const r2 = await fetch(`https://archive.org/advancedsearch.php?q=${encodeURIComponent(`(subject:(${g}) OR title:(${g})) AND mediatype:audio`)}&fl[]=identifier&fl[]=title&fl[]=creator&rows=5&output=json`);
+    const d2 = await r2.json();
+    for (const doc of (d2.response?.docs || [])) {
+      try {
+        const meta = await (await fetch(`https://archive.org/metadata/${doc.identifier}`)).json();
+        const a0 = (meta.files || []).find(f => /\.mp3$/i.test(f.name) || /\.ogg$/i.test(f.name));
+        if (a0) resultados.push({ titulo: a0.title || a0.name, artista: doc.creator || 'Desconocido', album: doc.title, url: `https://archive.org/download/${doc.identifier}/${encodeURIComponent(a0.name)}`, origen: 'Internet Archive' });
+      } catch (_) {}
+    }
+    pintarResultados();
+  }
+}
 
 /* ---------- Cola ---------- */
 function pintarCola() {
