@@ -179,7 +179,9 @@ function pintarResultados() {
   const ul = $('lista-resultados');
   ul.innerHTML = '';
   $('sin-resultados').style.display = resultados.length ? 'none' : 'block';
-  if (!resultados.length && fuente !== 'local') $('sin-resultados').textContent = 'Sin resultados.';
+  if (!resultados.length && fuente !== 'local') $('sin-resultados').textContent = fuente === 'jamendo'
+    ? 'Sin resultados en Jamendo. Recuerda: Jamendo solo tiene música libre (artistas independientes, jazz, electrónica, etc.). Los artistas comerciales no aparecen. Prueba con un género o "jazz".'
+    : 'Sin resultados en Internet Archive. Prueba con otro término o un artista de música libre.';
   resultados.forEach((p, i) => {
     const li = document.createElement('li');
     li.innerHTML = `<div style="display:flex;align-items:center;min-width:0"><img src="${p.cover || 'logo.svg'}" onerror="this.src='logo.svg'" style="width:48px;height:48px;border-radius:8px;object-fit:cover;margin-right:10px">
