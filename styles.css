@@ -21,6 +21,11 @@ input[type=text] { background: #0f172a; border: 1px solid #334155; color: #e2e8f
 .genero:hover { background: #38bdf8; color: #0f172a; }
 .ayuda { color: #94a3b8; font-size: 0.85rem; margin-top: 6px; }
 ul { list-style: none; }
+ul.tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+ul.tarjetas li { flex-direction: column; align-items: stretch; border: none; background: #0f172a; border-radius: 12px; padding: 10px; }
+ul.tarjetas li > div:first-child { flex-direction: column; align-items: flex-start; }
+ul.tarjetas li img { width: 100% !important; height: 120px !important; border-radius: 10px; margin: 0 0 8px !important; }
+ul.tarjetas li strong { white-space: normal; font-size: 0.85rem; }
 li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 6px; border-bottom: 1px solid #334155; }
 li .meta { min-width: 0; }
 li strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 420px; }

@@ -6,6 +6,20 @@ let cola = [];            // cola de reproducción
 let indiceCola = -1;
 let locales = [];         // archivos locales del usuario
 let shuffle = false;
+let repetir = false;
+let vistaTarjetas = false;
+
+$('vista').addEventListener('click', () => {
+  vistaTarjetas = !vistaTarjetas;
+  $('lista-resultados').classList.toggle('tarjetas', vistaTarjetas);
+  $('vista').textContent = vistaTarjetas ? '☰ Vista lista' : '▦ Vista tarjetas';
+});
+
+$('repetir').addEventListener('click', () => {
+  repetir = !repetir;
+  $('repetir').classList.toggle('activo', repetir);
+  audio.loop = repetir;
+});
 
 /* ---------- Tabs de fuente ---------- */
 document.querySelectorAll('.fuente').forEach(b => b.addEventListener('click', () => {
@@ -203,6 +217,7 @@ async function buscarArchiveGenero(g) {
 function pintarCola() {
   const ul = $('lista-cola');
   ul.innerHTML = '';
+  $('contador-cola').textContent = cola.length ? `(${cola.length})` : '';
   cola.forEach((p, i) => {
     const li = document.createElement('li');
     li.innerHTML = `<div style="display:flex;align-items:center;min-width:0"><img src="${p.cover || 'logo.svg'}" onerror="this.src='logo.svg'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;margin-right:10px">
