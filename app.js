@@ -152,6 +152,12 @@ document.querySelectorAll('.genero').forEach(b => b.addEventListener('click', as
   try {
     const d = await (await fetch(url)).json();
     resultados = (d.results || []).map(t => ({ titulo: t.name, artista: t.artist_name, album: t.album_name, url: t.audio, origen: 'Jamendo (CC)' }));
+    // Si no hay resultados por etiqueta, buscar por nombre/etiqueta
+    if (!resultados.length) {
+      const alt = `https://api.jamendo.com/v3.0/tracks/?client_id=${jamendoKey()}&format=json&limit=30&tags=${b.dataset.g}&audioformat=mp31`;
+      const d2 = await (await fetch(alt)).json();
+      resultados = (d2.results || []).map(t => ({ titulo: t.name, artista: t.artist_name, album: t.album_name, url: t.audio, origen: 'Jamendo (CC)' }));
+    }
     pintarResultados();
   } catch (e) { $('sin-resultados').textContent = 'Error: ' + e.message; }
 }));
